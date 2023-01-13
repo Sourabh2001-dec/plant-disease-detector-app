@@ -29,7 +29,7 @@ const TabNavigator = () => {
             if (focused) {
               return <FontAwesome5 name="user-alt" size={24} color="#EF5B5E" />;
             }
-            return <FontAwesome5 name="user" size={24} color="##9098AC" />;
+            return <FontAwesome5 name="user" size={24} color="#9098AC" />;
           }
         },
         tabBarActiveTintColor: "#EF5B5E",
