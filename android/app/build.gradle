@@ -252,7 +252,26 @@ android {
 
         }
     }
+
+    // Pytorch setup
+
+    packagingOptions {
+        pickFirst '**/*.so'
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs += ["$buildDir/extra-jniLibs/jni"]
+        }
+    }
+    configurations {
+        extraJNILibs
+    }
+
+//
 }
+
+
+
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
@@ -275,6 +294,10 @@ android {
 }
 
 dependencies {
+    // pytorch
+    extraJNILibs("com.facebook.fbjni:fbjni:0.2.2")
+    //
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     //noinspection GradleDynamicVersion
@@ -325,6 +348,27 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+}
+
+// Extract JNI shared libraries as project libraries. This assumes the target directory, $buildDir/extra-jniLibs, is added to the jniLibs.srcDirs configuration.
+task extraJNILibs {
+  doLast {
+    configurations.extraJNILibs.files.each {
+      def file = it.absoluteFile
+
+      copy {
+        from zipTree(file)
+        into "$buildDir/extra-jniLibs" // temp location instead of "src/main/jniLibs"
+        include "jni/**/*"
+      }
+    }
+  }
+}
+
+tasks.whenTaskAdded { task ->
+  if (task.name == 'mergeDebugJniLibFolders' || task.name == 'mergeReleaseJniLibFolders') {
+    task.dependsOn(extraJNILibs)
+  }
 }
 
 if (isNewArchitectureEnabled()) {
