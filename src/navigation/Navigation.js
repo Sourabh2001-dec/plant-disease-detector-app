@@ -5,15 +5,21 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NativeBaseProvider } from "native-base";
 import AuthNavigator from "./AuthNavigator";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { loggedInAtom, userAtom } from "../shared/atoms";
+import { locationAtom, loggedInAtom, userAtom } from "../shared/atoms";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
 const Navigation = () => {
     const [loggedIn, setLoggedIn] = useAtom(loggedInAtom);
     const setUser = useSetAtom(userAtom);
+    const setLocation = useSetAtom(locationAtom);
 
     useEffect(() => {
+        fetch("http://ip-api.com/json")
+            .then((res) => res.json())
+            .then((data) => {
+                setLocation(data);
+            });
         const unsub = auth().onAuthStateChanged(async (user) => {
             if (user) {
                 setLoggedIn(true);
