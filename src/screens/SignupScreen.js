@@ -1,130 +1,268 @@
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { Input, Button, Text, Stack, Icon } from "native-base";
+import { Input, Button, Text, Stack, Icon, VStack, View } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { SCREENS } from "../shared/constants";
-import { Pressable, View } from "react-native";
+import { Alert, Pressable } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import { useSetAtom } from "jotai";
+import { loggedInAtom, userAtom } from "../shared/atoms";
+
+const schema = Yup.object().shape({
+    email: Yup.string().email().required(),
+    name: Yup.string().required("Name is required"),
+    password: Yup.string().required(),
+    confirmPassword: Yup.string().oneOf(
+        [Yup.ref("password"), null],
+        "Passwords must match"
+    ),
+});
 
 const SignupScreen = () => {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const [secureTextEntry2, setSecureTextEntry2] = useState(true);
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const [secureTextEntry2, setSecureTextEntry2] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation();
+    const { control, handleSubmit, getValues, reset } = useForm({
+        resolver: yupResolver(schema),
+    });
 
-  const handleSubmit = () => {
-    console.log(`Email: ${email}, Password: ${password}`);
-  };
-  return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      <Stack px={4} mt={"200px"}>
-        <Text fontSize="2xl" textAlign="center" mb={10}>
-          Sign Up
-        </Text>
-        <Input
-          variant="filled"
-          placeholder="Name"
-          value={name}
-          onChangeText={setName}
-          mb={5}
-          py={3}
-          px={5}
-        />
-        <Input
-          variant="filled"
-          placeholder="Mobile Number"
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-          mb={5}
-          py={3}
-          px={5}
-        />
-        <Input
-          variant="filled"
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          mb={5}
-          py={3}
-          px={5}
-        />
-        <Input
-          variant="filled"
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          mb={5}
-          py={3}
-          px={5}
-          secureTextEntry={secureTextEntry ? true : false}
-          InputRightElement={
-            <Pressable onPress={() => setSecureTextEntry(!secureTextEntry)}>
-              <Icon
-                as={
-                  <Ionicons
-                    name={secureTextEntry ? "ios-eye-off" : "ios-eye"}
-                    size={24}
-                    color="black"
-                  />
+    console.log(getValues());
+
+    const navigation = useNavigation();
+
+    const setLoggedIn = useSetAtom(loggedInAtom);
+    const setUser = useSetAtom(userAtom);
+
+    const onSubmit = (data) => {
+        setLoading(true);
+        auth()
+            .createUserWithEmailAndPassword(data.email, data.password)
+            .then(async (userData) => {
+                await firestore()
+                    .collection("users")
+                    .doc(userData.user.uid)
+                    .set({
+                        name: data.name,
+                        email: data.email,
+                    });
+                reset();
+                setLoggedIn(true);
+                setUser({
+                    name: data.name,
+                    email: data.email,
+                });
+            })
+            .catch((error) => {
+                let errorMessage = "Failed to create account";
+                if (error.code === "auth/email-already-in-use") {
+                    errorMessage = "That email address is already in use!";
                 }
-                size={5}
-                mr="2"
-                color="muted.400"
-              />
-            </Pressable>
-          }
-        />
-        <Input
-          variant="filled"
-          placeholder="Confirm Password"
-          value={password2}
-          onChangeText={setPassword2}
-          mb={12}
-          py={3}
-          px={5}
-          secureTextEntry={secureTextEntry2 ? true : false}
-          InputRightElement={
-            <Pressable onPress={() => setSecureTextEntry2(!secureTextEntry2)}>
-              <Icon
-                as={
-                  <Ionicons
-                    name={secureTextEntry2 ? "ios-eye-off" : "ios-eye"}
-                    size={24}
-                    color="black"
-                  />
+
+                if (error.code === "auth/invalid-email") {
+                    errorMessage = "That email address is invalid!";
                 }
-                size={5}
-                mr="2"
-                color="muted.400"
-              />
-            </Pressable>
-          }
-        />
-        <Button
-          onPress={handleSubmit}
-          variant="solid"
-          colorScheme="#EF5B5E"
-          _text={{ color: "white" }}
-          mb={5}>
-          Sign up
-        </Button>
-        <Stack justifyContent="center" alignItems="center">
-          <Text>
-            Already have an account?{" "}
-            <Pressable onPress={() => navigation.navigate(SCREENS.LOGIN)}>
-              <Text color="primary.500" fontWeight="bold">
-                Login
-              </Text>
-            </Pressable>
-          </Text>
-        </Stack>
-      </Stack>
-    </View>
-  );
+
+                Alert.alert("Error", errorMessage);
+            })
+            .finally(() => setLoading(false));
+    };
+
+    return (
+        <VStack
+            style={{ flex: 1, backgroundColor: "#fff" }}
+            justifyContent="center"
+        >
+            <Stack px={4}>
+                <Text fontSize="2xl" textAlign="center" mb={10}>
+                    Sign Up
+                </Text>
+
+                <Controller
+                    control={control}
+                    name="name"
+                    render={({
+                        field: { onChange, value, onBlur },
+                        fieldState: { error },
+                    }) => (
+                        <View mb={4}>
+                            <Input
+                                variant="filled"
+                                placeholder="Name"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                py={3}
+                                px={5}
+                            />
+                            {error && (
+                                <Text color={"error.500"}>
+                                    {error?.message}
+                                </Text>
+                            )}
+                        </View>
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="email"
+                    render={({
+                        field: { onChange, value, onBlur },
+                        fieldState: { error },
+                    }) => (
+                        <View mb={4}>
+                            <Input
+                                variant="filled"
+                                placeholder="Email"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                py={3}
+                                px={5}
+                            />
+                            {error && (
+                                <Text color={"error.500"}>
+                                    {error?.message}
+                                </Text>
+                            )}
+                        </View>
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="password"
+                    render={({
+                        field: { onChange, value, onBlur },
+                        fieldState: { error },
+                    }) => (
+                        <View mb={4}>
+                            <Input
+                                variant="filled"
+                                placeholder="Password"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                py={3}
+                                px={5}
+                                secureTextEntry={secureTextEntry ? true : false}
+                                InputRightElement={
+                                    <Pressable
+                                        onPress={() =>
+                                            setSecureTextEntry(!secureTextEntry)
+                                        }
+                                    >
+                                        <Icon
+                                            as={
+                                                <Ionicons
+                                                    name={
+                                                        secureTextEntry
+                                                            ? "ios-eye-off"
+                                                            : "ios-eye"
+                                                    }
+                                                    size={24}
+                                                    color="black"
+                                                />
+                                            }
+                                            size={5}
+                                            mr="2"
+                                            color="muted.400"
+                                        />
+                                    </Pressable>
+                                }
+                            />
+                            {error && (
+                                <Text color={"error.500"}>
+                                    {error?.message}
+                                </Text>
+                            )}
+                        </View>
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="confirmPassword"
+                    render={({
+                        field: { onChange, value, onBlur },
+                        fieldState: { error },
+                    }) => (
+                        <View mb={4}>
+                            <Input
+                                variant="filled"
+                                placeholder="Confirm Password"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                py={3}
+                                px={5}
+                                secureTextEntry={
+                                    secureTextEntry2 ? true : false
+                                }
+                                InputRightElement={
+                                    <Pressable
+                                        onPress={() =>
+                                            setSecureTextEntry2(
+                                                !secureTextEntry2
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            as={
+                                                <Ionicons
+                                                    name={
+                                                        secureTextEntry2
+                                                            ? "ios-eye-off"
+                                                            : "ios-eye"
+                                                    }
+                                                    size={24}
+                                                    color="black"
+                                                />
+                                            }
+                                            size={5}
+                                            mr="2"
+                                            color="muted.400"
+                                        />
+                                    </Pressable>
+                                }
+                            />
+                            {error && (
+                                <Text color={"error.500"}>
+                                    {error?.message}
+                                </Text>
+                            )}
+                        </View>
+                    )}
+                />
+                <Button
+                    onPress={handleSubmit(onSubmit)}
+                    variant="solid"
+                    color="yellow"
+                    _text={{ color: "white" }}
+                    mb={5}
+                    isLoading={loading}
+                    isLoadingText="Signing up..."
+                >
+                    Signup
+                </Button>
+                <Stack justifyContent="center" alignItems="center">
+                    <Text>Already have an account? </Text>
+                    <Pressable
+                        onPress={() => navigation.navigate(SCREENS.LOGIN)}
+                    >
+                        <Text color="primary.500" fontWeight="bold">
+                            Login
+                        </Text>
+                    </Pressable>
+                </Stack>
+            </Stack>
+        </VStack>
+    );
 };
 
 export default SignupScreen;

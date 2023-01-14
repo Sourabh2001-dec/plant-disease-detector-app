@@ -29,46 +29,46 @@ const actions = [
   },
 ];
 
-const localDiseaseArray = [
-  {
-    id: 1,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 2,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 3,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 4,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 5,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 6,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-  {
-    id: 7,
-    name: "Apple Scab",
-    verifier: "Sanket Kulkarni",
-  },
-];
-
 const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
+
+  const localDiseaseArray = [
+    {
+      id: 1,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 2,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 3,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 4,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 5,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 6,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+    {
+      id: 7,
+      name: "Apple Scab",
+      verifier: "Sanket Kulkarni",
+    },
+  ];
 
   const cropsArray = [
     {

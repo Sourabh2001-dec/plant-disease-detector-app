@@ -1,9 +1,49 @@
 import { ScrollView, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Divider, HStack, Stack, Text, VStack } from "native-base";
 import { FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { userAtom } from "../shared/atoms";
+import { useAtomValue } from "jotai";
+import { useNavigation } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons";
+import auth from "@react-native-firebase/auth";
 
 const ProfileScreen = () => {
+  const userData = useAtomValue(userAtom);
+
+  const navigation = useNavigation();
+
+  const logout = async () => {
+    try {
+      await auth().signOut();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <HStack px={2}>
+          <TouchableOpacity onPress={logout}>
+            <HStack space={1}>
+              <AntDesign name="logout" size={20} color="#EF5B5E" />
+              <Text
+                style={{
+                  textTransform: "uppercase",
+                }}
+                fontWeight="bold"
+                color="#EF5B5E">
+                Logout
+              </Text>
+            </HStack>
+          </TouchableOpacity>
+        </HStack>
+      ),
+    });
+
+    return () => {};
+  }, []);
   const previousCropsArray = [
     {
       id: 1,
@@ -38,8 +78,8 @@ const ProfileScreen = () => {
           <HStack mt={5} mb={4} alignItems="center">
             <FontAwesome name="user-circle" size={50} color="#EF5B5E" />
             <Stack ml={3} alignItems="center" justifycontent="cenyter">
-              <Text fontSize={20}>Sanket Kulkarni</Text>
-              <Text alignSelf="flex-start">sanket@gmail.com</Text>
+              <Text fontSize={20}>{userData?.name}</Text>
+              <Text alignSelf="flex-start">{userData?.email}</Text>
             </Stack>
           </HStack>
           <Divider />

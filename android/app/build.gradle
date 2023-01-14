@@ -325,6 +325,9 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    apply plugin: 'com.android.application'
+    apply plugin: 'com.google.gms.google-services'
 }
 
 if (isNewArchitectureEnabled()) {
