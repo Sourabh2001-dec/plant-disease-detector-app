@@ -13,6 +13,9 @@ import * as ImagePicker from "expo-image-picker";
 import API from "../axios/api";
 import RNFetchBlob from "rn-fetch-blob";
 import Loading from "../components/Loading";
+import { AntDesign } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/core";
+import { SCREENS } from "../shared/constants";
 
 const actions = [
   {
@@ -31,6 +34,8 @@ const actions = [
 
 const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
+
+  const navigation = useNavigation();
 
   const localDiseaseArray = [
     {
@@ -73,33 +78,33 @@ const HomeScreen = () => {
   const cropsArray = [
     {
       id: 1,
-      name: "Tomato",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Apple",
+      image: require("../../assets/images/apple.jpeg"),
     },
     {
       id: 2,
-      name: "Potato",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Cherry",
+      image: require("../../assets/images/cherry.jpg"),
     },
     {
       id: 3,
-      name: "Onion",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Corn",
+      image: require("../../assets/images/corn.jpg"),
     },
     {
       id: 4,
-      name: "Cabbage",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Grapes",
+      image: require("../../assets/images/grapes.jpeg"),
     },
     {
       id: 5,
-      name: "Carrot",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Potato",
+      image: require("../../assets/images/potato.jpeg"),
     },
     {
       id: 6,
-      name: "Cucumber",
-      image: require("../../assets/images/test1.jpg"),
+      name: "Tomato",
+      image: require("../../assets/images/tomato.jpeg"),
     },
   ];
 
@@ -181,7 +186,11 @@ const HomeScreen = () => {
                 <TouchableOpacity
                   style={{ marginBottom: 30 }}
                   activeOpacity={0.7}
-                  onPress={() => console.log("CropDetails")}>
+                  onPress={() =>
+                    navigation.navigate(SCREENS.DISEASE_LIST, {
+                      cropName: crop?.name,
+                    })
+                  }>
                   <Stack
                     bg="#F5F5F5"
                     borderRadius={10}
@@ -189,10 +198,17 @@ const HomeScreen = () => {
                     py={5}
                     alignItems="center"
                     justifyContent="center">
-                    <Ionicons name="md-leaf" size={50} color="#EF5B5E" />
+                    <Image
+                      source={crop?.image}
+                      style={{ width: 90, height: 50 }}
+                    />
                   </Stack>
-                  <Text mt={1} fontSize={18} fontWeight={600}>
-                    Crop Name
+                  <Text
+                    textAlign="center"
+                    mt={1}
+                    fontSize={18}
+                    fontWeight={600}>
+                    {crop?.name}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -230,7 +246,7 @@ const HomeScreen = () => {
           position="right"
           onPressItem={(name) => handlePress(name)}
           distanceToEdge={{ horizontal: 20, vertical: 20 }}
-          floatingIcon={<Ionicons name="md-add" size={30} color="#fff" />}
+          floatingIcon={<AntDesign name="scan1" size={24} color="#fff" />}
           iconHeight={30}
           iconWidth={30}
           color="#EF5B5E"
