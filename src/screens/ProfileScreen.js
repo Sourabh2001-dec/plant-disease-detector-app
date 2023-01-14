@@ -1,5 +1,11 @@
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Divider, HStack, Stack, Text, VStack } from "native-base";
 import { FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { userAtom } from "../shared/atoms";
@@ -7,9 +13,26 @@ import { useAtomValue } from "jotai";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import { SCREENS } from "../shared/constants";
 
 const ProfileScreen = () => {
   const userData = useAtomValue(userAtom);
+  const userId = auth().currentUser.uid;
+  const [historyData, setHistoryData] = useState([]);
+
+  const fetchHistory = async () => {
+    try {
+      const snapshot = await firestore()
+        .collection("history")
+        .where("userId", "==", userId)
+        .get();
+      const data = snapshot.docs.map((doc) => doc.data());
+      setHistoryData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const navigation = useNavigation();
 
@@ -22,6 +45,7 @@ const ProfileScreen = () => {
   };
 
   useEffect(() => {
+    fetchHistory();
     navigation.setOptions({
       headerRight: () => (
         <HStack px={2}>
@@ -44,6 +68,7 @@ const ProfileScreen = () => {
 
     return () => {};
   }, []);
+
   const previousCropsArray = [
     {
       id: 1,
@@ -87,16 +112,28 @@ const ProfileScreen = () => {
           <HStack mt={5} alignItems="center">
             <FontAwesome5 name="history" size={24} color="#EF5B5E" />
             <Text ml={5} fontSize={18} fontWeight={600}>
-              Previously Visited Crops
+              Previously Scanned Crops
             </Text>
           </HStack>
           <Stack mt={5}>
-            {previousCropsArray && previousCropsArray.length > 0 ? (
-              previousCropsArray.map((crop) => (
+            <FlatList
+              data={historyData}
+              ListEmptyComponent={() => (
+                <Text textAlign="center" mt={8} fontSize={17}>
+                  No previous crops
+                </Text>
+              )}
+              keyExtractor={(item) => item?.prediction_key}
+              renderItem={({ item }) => (
                 <TouchableOpacity
                   style={{ marginBottom: 30 }}
                   activeOpacity={0.7}
-                  onPress={() => console.log("CropDetails")}>
+                  onPress={() =>
+                    navigation.navigate(SCREENS.RESULT, {
+                      key: item?.prediction_key,
+                      image_url: item?.image_url,
+                    })
+                  }>
                   <HStack
                     bg="#F5F5F5"
                     borderRadius={10}
@@ -104,23 +141,22 @@ const ProfileScreen = () => {
                     py={5}
                     alignItems="center"
                     justifyContent="flex-start">
-                    <Ionicons name="md-leaf" size={50} color="#EF5B5E" />
+                    <Image
+                      source={{ uri: item?.image_url }}
+                      style={{ height: 60, width: 60, borderRadius: 10 }}
+                    />
                     <Stack>
                       <Text ml={3} fontSize={18} fontWeight={600}>
-                        Crop Name
+                        {item?.disease_name}
                       </Text>
                       <Text ml={3} fontSize={15} fontWeight={400}>
-                        Crop Disease
+                        {item?.crop_name}
                       </Text>
                     </Stack>
                   </HStack>
                 </TouchableOpacity>
-              ))
-            ) : (
-              <Text textAlign="center" mt={8} fontSize={17}>
-                No previous crops
-              </Text>
-            )}
+              )}
+            />
           </Stack>
         </Stack>
       </ScrollView>
