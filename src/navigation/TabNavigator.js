@@ -13,33 +13,62 @@ import ResultScreen from "../screens/ResultScreen";
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
-  const insets = useSafeAreaInsets();
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+    const insets = useSafeAreaInsets();
+    return (
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
 
-          if (route.name === SCREENS.HOME) {
-            if (focused) {
-              return <Ionicons name="home-sharp" size={24} color="#EF5B5E" />;
-            }
-            return <Ionicons name="home-outline" size={24} color="#9098AC" />;
-          }
-          if (route.name === SCREENS.PROFILE) {
-            if (focused) {
-              return <FontAwesome5 name="user-alt" size={24} color="#EF5B5E" />;
-            }
-            return <FontAwesome5 name="user" size={24} color="#9098AC" />;
-          }
-        },
-        tabBarActiveTintColor: "#EF5B5E",
-        tabBarInactiveTintColor: "#9098AC",
-      })}>
-      <Tab.Screen name={SCREENS.HOME} component={HomeScreen} />
-      <Tab.Screen name={SCREENS.PROFILE} component={ProfileScreen} />
-    </Tab.Navigator>
-  );
+                    if (route.name === SCREENS.HOME) {
+                        if (focused) {
+                            return (
+                                <Ionicons
+                                    name="home-sharp"
+                                    size={24}
+                                    color="#EF5B5E"
+                                />
+                            );
+                        }
+                        return (
+                            <Ionicons
+                                name="home-outline"
+                                size={24}
+                                color="#9098AC"
+                            />
+                        );
+                    }
+                    if (route.name === SCREENS.PROFILE) {
+                        if (focused) {
+                            return (
+                                <FontAwesome5
+                                    name="user-alt"
+                                    size={24}
+                                    color="#EF5B5E"
+                                />
+                            );
+                        }
+                        return (
+                            <FontAwesome5
+                                name="user"
+                                size={24}
+                                color="#9098AC"
+                            />
+                        );
+                    }
+                },
+                tabBarActiveTintColor: "#EF5B5E",
+                tabBarInactiveTintColor: "#9098AC",
+            })}
+        >
+            <Tab.Screen
+                name={SCREENS.HOME}
+                component={HomeScreen}
+                options={{ headerShown: false }}
+            />
+            <Tab.Screen name={SCREENS.PROFILE} component={ProfileScreen} />
+        </Tab.Navigator>
+    );
 };
 
 export default TabNavigator;

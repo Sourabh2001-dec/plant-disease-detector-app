@@ -125,6 +125,11 @@ const HomeScreen = () => {
         diseases.forEach((disease) => {
             diseasesArray.push(disease.data());
         });
+        // sort diseasesArray in descending order of timestamp using moment
+        diseasesArray.sort((a, b) => {
+            return moment(b.timestamp).diff(moment(a.timestamp));
+        });
+
         setLocationDiseases(diseasesArray);
     };
 
@@ -278,7 +283,13 @@ const HomeScreen = () => {
                                 >
                                     {cropsArray.map((crop) => (
                                         <TouchableOpacity
-                                            style={{ marginBottom: 30 }}
+                                            style={{
+                                                marginBottom: 30,
+                                                borderColor: "#F5F5F9",
+                                                borderWidth: 1,
+                                                padding: 4,
+                                                borderRadius: 10,
+                                            }}
                                             activeOpacity={0.7}
                                             onPress={() =>
                                                 navigation.navigate(
@@ -292,8 +303,6 @@ const HomeScreen = () => {
                                             <Stack
                                                 bg="#F5F5F5"
                                                 borderRadius={10}
-                                                px={1}
-                                                py={5}
                                                 alignItems="center"
                                                 justifyContent="center"
                                             >
@@ -301,7 +310,7 @@ const HomeScreen = () => {
                                                     source={crop?.image}
                                                     style={{
                                                         width: 90,
-                                                        height: 50,
+                                                        height: 90,
                                                         resizeMode: "cover",
                                                     }}
                                                 />
