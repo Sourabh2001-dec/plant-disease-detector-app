@@ -1,3 +1,12 @@
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import storage from "@react-native-firebase/storage";
+import { useNavigation } from "@react-navigation/core";
+import * as ImagePicker from "expo-image-picker";
+import { useAtomValue } from "jotai";
+import { Divider, Stack, Text } from "native-base";
+import React, { useState } from "react";
 import {
     Alert,
     Image,
@@ -6,20 +15,11 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { Divider, HStack, Stack, Text } from "native-base";
-import React, { useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import { FloatingAction } from "react-native-floating-action";
-import * as ImagePicker from "expo-image-picker";
-import API from "../axios/api";
 import RNFetchBlob from "rn-fetch-blob";
 import Loading from "../components/Loading";
-import { nanoid } from "nanoid";
-import { useAtomValue } from "jotai";
 import { locationAtom, userAtom } from "../shared/atoms";
-import auth from "@react-native-firebase/auth";
-import storage from "@react-native-firebase/storage";
-import firestore from "@react-native-firebase/firestore";
+import { SCREENS } from "../shared/constants";
 
 const actions = [
     {
@@ -40,6 +40,8 @@ const HomeScreen = () => {
     const [loading, setLoading] = useState(false);
     const location = useAtomValue(locationAtom);
     const user = useAtomValue(userAtom);
+
+    const navigation = useNavigation();
 
     const localDiseaseArray = [
         {
@@ -82,33 +84,33 @@ const HomeScreen = () => {
     const cropsArray = [
         {
             id: 1,
-            name: "Tomato",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Apple",
+            image: require("../../assets/images/apple.jpeg"),
         },
         {
             id: 2,
-            name: "Potato",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Cherry",
+            image: require("../../assets/images/cherry.jpg"),
         },
         {
             id: 3,
-            name: "Onion",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Corn",
+            image: require("../../assets/images/corn.jpg"),
         },
         {
             id: 4,
-            name: "Cabbage",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Grapes",
+            image: require("../../assets/images/grapes.jpeg"),
         },
         {
             id: 5,
-            name: "Carrot",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Potato",
+            image: require("../../assets/images/potato.jpeg"),
         },
         {
             id: 6,
-            name: "Cucumber",
-            image: require("../../assets/images/test1.jpg"),
+            name: "Tomato",
+            image: require("../../assets/images/tomato.jpeg"),
         },
     ];
 
@@ -248,7 +250,14 @@ const HomeScreen = () => {
                                 <TouchableOpacity
                                     style={{ marginBottom: 30 }}
                                     activeOpacity={0.7}
-                                    onPress={() => console.log("CropDetails")}
+                                    onPress={() =>
+                                        navigation.navigate(
+                                            SCREENS.DISEASE_LIST,
+                                            {
+                                                cropName: crop?.name,
+                                            }
+                                        )
+                                    }
                                 >
                                     <Stack
                                         bg="#F5F5F5"
@@ -258,14 +267,18 @@ const HomeScreen = () => {
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <Ionicons
-                                            name="md-leaf"
-                                            size={50}
-                                            color="#EF5B5E"
+                                        <Image
+                                            source={crop?.image}
+                                            style={{ width: 90, height: 50 }}
                                         />
                                     </Stack>
-                                    <Text mt={1} fontSize={18} fontWeight={600}>
-                                        Crop Name
+                                    <Text
+                                        textAlign="center"
+                                        mt={1}
+                                        fontSize={18}
+                                        fontWeight={600}
+                                    >
+                                        {crop?.name}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
@@ -308,7 +321,7 @@ const HomeScreen = () => {
                     onPressItem={(name) => handlePress(name)}
                     distanceToEdge={{ horizontal: 20, vertical: 20 }}
                     floatingIcon={
-                        <Ionicons name="md-add" size={30} color="#fff" />
+                        <AntDesign name="scan1" size={24} color="#fff" />
                     }
                     iconHeight={30}
                     iconWidth={30}

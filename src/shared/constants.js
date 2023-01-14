@@ -5,4 +5,5 @@ export const SCREENS = {
   LOGIN: "Login",
   SIGNUP: "Signup",
   RESULT: "Result",
+  DISEASE_LIST: "DiseaseList",
 };
