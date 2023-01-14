@@ -193,8 +193,8 @@ const HomeScreen = () => {
             // const prediction = "asdjhkasdhf";
             const prediction = await RNFetchBlob.fetch(
                 "POST",
-                "https://fastapi-hackathon.onrender.com/upload",
-                // "http://192.168.137.190:8000/upload",
+                // "https://fastapi-hackathon.onrender.com/upload",
+                "http://192.168.137.51:8000/upload",
                 {
                     "Content-Type": "multipart/form-data",
                 },
@@ -220,7 +220,7 @@ const HomeScreen = () => {
             console.log("Error -> ", error);
             setLoading(false);
             Alert.alert(
-                "ALert",
+                "Alert",
                 "Object is not a plant or the crop is healthy"
             );
         }
