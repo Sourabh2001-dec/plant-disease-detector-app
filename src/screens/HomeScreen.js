@@ -5,15 +5,15 @@ import storage from "@react-native-firebase/storage";
 import { useNavigation } from "@react-navigation/core";
 import * as ImagePicker from "expo-image-picker";
 import { useAtomValue } from "jotai";
-import { Divider, Stack, Text } from "native-base";
-import React, { useState } from "react";
+import moment from "moment/moment";
+import { Divider, FlatList, HStack, Stack, Text, View } from "native-base";
+import React, { useEffect, useState } from "react";
 import {
     Alert,
     Image,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    View,
 } from "react-native";
 import { FloatingAction } from "react-native-floating-action";
 import RNFetchBlob from "rn-fetch-blob";
@@ -40,6 +40,7 @@ const HomeScreen = () => {
     const [loading, setLoading] = useState(false);
     const location = useAtomValue(locationAtom);
     const user = useAtomValue(userAtom);
+    const [locationDiseases, setLocationDiseases] = useState([]);
 
     const navigation = useNavigation();
 
@@ -114,6 +115,27 @@ const HomeScreen = () => {
         },
     ];
 
+    const fetchLocalDiseases = async () => {
+        const diseases = await firestore()
+            .collection("history")
+            .where("userId", "==", auth().currentUser.uid)
+            .where("city", "==", location?.city)
+            .get();
+        const diseasesArray = [];
+        diseases.forEach((disease) => {
+            diseasesArray.push(disease.data());
+        });
+        setLocationDiseases(diseasesArray);
+    };
+
+    useEffect(() => {
+        if (location) {
+            fetchLocalDiseases();
+        }
+
+        return () => {};
+    }, [location?.city]);
+
     const handleUploadAndSaveImage = async (prediction, imageData) => {
         console.log("prediction is:", imageData);
         const imageId = firestore().collection("scanned_images").doc().id;
@@ -152,6 +174,11 @@ const HomeScreen = () => {
                         lat: location?.lat,
                         lon: location?.lon,
                     });
+                fetchLocalDiseases();
+                navigation.navigate(SCREENS.RESULT, {
+                    image_url: url,
+                    key: prediction,
+                });
 
                 setLoading(false);
             },
@@ -176,9 +203,9 @@ const HomeScreen = () => {
                     } else {
                         result = await ImagePicker.launchCameraAsync({
                             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                            allowsEditing: false,
-                            aspect: [4, 3],
-                            quality: 1,
+                            allowsEditing: true,
+                            aspect: [1, 1],
+                            quality: 0.7,
                             base64: true,
                         });
                     }
@@ -186,9 +213,9 @@ const HomeScreen = () => {
                 case "gallery":
                     result = await ImagePicker.launchImageLibraryAsync({
                         mediaTypes: ImagePicker.MediaTypeOptions.All,
-                        allowsEditing: false,
-                        aspect: [4, 3],
-                        quality: 1,
+                        allowsEditing: true,
+                        aspect: [1, 1],
+                        quality: 0.7,
                         base64: true,
                     });
                     break;
@@ -200,14 +227,15 @@ const HomeScreen = () => {
             // const prediction = "asdjhkasdhf";
             const prediction = await RNFetchBlob.fetch(
                 "POST",
-                "http://192.168.137.190:8000/upload",
+                "https://fastapi-hackathon.onrender.com/upload",
+                // "http://192.168.137.190:8000/upload",
                 {
                     "Content-Type": "multipart/form-data",
                 },
                 [
                     {
                         name: "file",
-                        filename: "image.jpg",
+                        filename: `image-${new Date().toString()}.jpg`,
                         type: "image/jpeg",
                         data: RNFetchBlob.wrap(result.assets[0]?.uri),
                     },
@@ -235,86 +263,116 @@ const HomeScreen = () => {
     return (
         <View style={{ flex: 1, backgroundColor: "#fff" }}>
             <Loading isLoading={loading}>
-                <ScrollView>
-                    <Stack px={4}>
-                        <Text mt={5} fontSize={22} fontWeight={600}>
-                            Crops
-                        </Text>
-                        <Stack
-                            direction="row"
-                            flexWrap="wrap"
-                            justifyContent="space-between"
-                            mt={5}
-                        >
-                            {cropsArray.map((crop) => (
-                                <TouchableOpacity
-                                    style={{ marginBottom: 30 }}
-                                    activeOpacity={0.7}
-                                    onPress={() =>
-                                        navigation.navigate(
-                                            SCREENS.DISEASE_LIST,
-                                            {
-                                                cropName: crop?.name,
-                                            }
-                                        )
-                                    }
+                <FlatList
+                    ListHeaderComponent={() => {
+                        return (
+                            <View px={4}>
+                                <Text mt={5} fontSize={22} fontWeight={600}>
+                                    Crops
+                                </Text>
+                                <Stack
+                                    direction="row"
+                                    flexWrap="wrap"
+                                    justifyContent="space-between"
+                                    mt={5}
                                 >
-                                    <Stack
-                                        bg="#F5F5F5"
-                                        borderRadius={10}
-                                        px={1}
-                                        py={5}
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >
-                                        <Image
-                                            source={crop?.image}
-                                            style={{ width: 90, height: 50 }}
-                                        />
-                                    </Stack>
-                                    <Text
-                                        textAlign="center"
-                                        mt={1}
-                                        fontSize={18}
-                                        fontWeight={600}
-                                    >
-                                        {crop?.name}
+                                    {cropsArray.map((crop) => (
+                                        <TouchableOpacity
+                                            style={{ marginBottom: 30 }}
+                                            activeOpacity={0.7}
+                                            onPress={() =>
+                                                navigation.navigate(
+                                                    SCREENS.DISEASE_LIST,
+                                                    {
+                                                        cropName: crop?.name,
+                                                    }
+                                                )
+                                            }
+                                        >
+                                            <Stack
+                                                bg="#F5F5F5"
+                                                borderRadius={10}
+                                                px={1}
+                                                py={5}
+                                                alignItems="center"
+                                                justifyContent="center"
+                                            >
+                                                <Image
+                                                    source={crop?.image}
+                                                    style={{
+                                                        width: 90,
+                                                        height: 50,
+                                                        resizeMode: "cover",
+                                                    }}
+                                                />
+                                            </Stack>
+                                            <Text
+                                                textAlign="center"
+                                                mt={1}
+                                                fontSize={18}
+                                                fontWeight={600}
+                                            >
+                                                {crop?.name}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </Stack>
+                                <Divider />
+                                <HStack
+                                    justifyContent={"space-between"}
+                                    alignItems="center"
+                                    mt={5}
+                                >
+                                    <Text fontSize={22} fontWeight={600}>
+                                        Local Disease Logs
                                     </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </Stack>
-                        <Divider />
-                        <Text mt={5} fontSize={22} fontWeight={600}>
-                            Local Disease Stats
-                        </Text>
-                        <Stack>
-                            {localDiseaseArray.map((disease) => (
-                                <>
-                                    <View style={styles.cardContainer}>
-                                        <Image
-                                            source={require("../../assets/images/test1.jpg")}
-                                            style={styles.cardImage}
-                                        />
-                                        <Text
-                                            textAlign="start"
-                                            style={styles.cardCaption}
-                                        >
-                                            {disease?.name}
-                                        </Text>
-                                        <Text
-                                            textAlign="start"
-                                            fontStyle="italic"
-                                            style={styles.cardCaption}
-                                        >
-                                            Verified by - {disease?.verifier}
-                                        </Text>
-                                    </View>
-                                    <Divider />
-                                </>
-                            ))}
-                        </Stack>
-                    </Stack>
-                </ScrollView>
+
+                                    <Text textTransform={"uppercase"}>
+                                        {location?.city}
+                                    </Text>
+                                </HStack>
+                            </View>
+                        );
+                    }}
+                    data={locationDiseases}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item: disease }) => (
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate(SCREENS.RESULT, {
+                                    key: disease?.prediction_key,
+                                    image_url: disease?.image_url,
+                                })
+                            }
+                        >
+                            <View style={styles.cardContainer} px={4}>
+                                <Image
+                                    source={{ uri: disease?.image_url }}
+                                    style={styles.cardImage}
+                                />
+                                <Text
+                                    textAlign="start"
+                                    style={styles.cardCaption}
+                                    fontWeight="semibold"
+                                >
+                                    {disease?.crop_name} -{" "}
+                                    {disease?.disease_name}
+                                </Text>
+
+                                <Text fontSize={16}>
+                                    Scanned by - {disease?.name}
+                                </Text>
+                                <Text fontSize={16}>
+                                    {moment(
+                                        new Date(disease?.timestamp)
+                                    ).fromNow()}
+                                </Text>
+                            </View>
+                            <Divider />
+                        </TouchableOpacity>
+                    )}
+                />
+
                 <FloatingAction
                     actions={actions}
                     position="right"

@@ -24,6 +24,7 @@
     "expo-splash-screen": "~0.17.5",
     "expo-status-bar": "~1.4.2",
     "jotai": "^1.13.0",
+    "moment": "^2.29.4",
     "native-base": "^3.4.25",
     "react": "18.1.0",
     "react-hook-form": "^7.42.0",
