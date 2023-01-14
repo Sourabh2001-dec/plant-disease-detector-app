@@ -44,44 +44,6 @@ const HomeScreen = () => {
 
     const navigation = useNavigation();
 
-    const localDiseaseArray = [
-        {
-            id: 1,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 2,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 3,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 4,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 5,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 6,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-        {
-            id: 7,
-            name: "Apple Scab",
-            verifier: "Sanket Kulkarni",
-        },
-    ];
-
     const cropsArray = [
         {
             id: 1,
@@ -118,7 +80,6 @@ const HomeScreen = () => {
     const fetchLocalDiseases = async () => {
         const diseases = await firestore()
             .collection("history")
-            .where("userId", "==", auth().currentUser.uid)
             .where("city", "==", location?.city)
             .get();
         const diseasesArray = [];
@@ -272,8 +233,8 @@ const HomeScreen = () => {
                     ListHeaderComponent={() => {
                         return (
                             <View px={4}>
-                                <Text mt={5} fontSize={22} fontWeight={600}>
-                                    Crops
+                                <Text mt={5} fontSize={22} fontWeight={"bold"}>
+                                    Crop Diseases
                                 </Text>
                                 <Stack
                                     direction="row"
@@ -332,8 +293,8 @@ const HomeScreen = () => {
                                     alignItems="center"
                                     mt={5}
                                 >
-                                    <Text fontSize={22} fontWeight={600}>
-                                        Local Disease Logs
+                                    <Text fontSize={22} fontWeight={"bold"}>
+                                        Diseases in your locality
                                     </Text>
 
                                     <Text textTransform={"uppercase"}>
@@ -362,7 +323,7 @@ const HomeScreen = () => {
                                 <Text
                                     textAlign="start"
                                     style={styles.cardCaption}
-                                    fontWeight="semibold"
+                                    fontWeight="bold"
                                 >
                                     {disease?.crop_name} -{" "}
                                     {disease?.disease_name}

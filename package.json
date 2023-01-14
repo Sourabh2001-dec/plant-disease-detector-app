@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/lato": "^0.2.2",
     "@expo/vector-icons": "^13.0.0",
     "@hookform/resolvers": "^2.9.10",
     "@react-native-firebase/app": "^16.5.0",

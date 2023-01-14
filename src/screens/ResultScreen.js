@@ -82,7 +82,7 @@ const ResultScreen = () => {
                         <Text mt={2} fontSize={20} fontStyle="italic">
                             Crop - {diseaseObj?.crop}
                         </Text>
-                        <Text mt={4} fontSize={17} fontWeight={500}>
+                        <Text mt={4} fontSize={17} fontWeight={"bold"}>
                             Suggested Pesticides :
                         </Text>
                         {diseaseObj?.pesticides &&
@@ -102,7 +102,7 @@ const ResultScreen = () => {
                                 No Pesticides Found
                             </Text>
                         )}
-                        <Text mt={4} fontSize={17} fontWeight={500}>
+                        <Text mt={4} fontSize={17} fontWeight={"bold"}>
                             Causes:
                         </Text>
                         {diseaseObj?.causes && diseaseObj?.causes.length > 0 ? (
@@ -123,7 +123,7 @@ const ResultScreen = () => {
                                 No Causes Found
                             </Text>
                         )}
-                        <Text fontSize={17} fontWeight={500}>
+                        <Text fontSize={17} fontWeight={"bold"}>
                             Preventions:
                         </Text>
                         {diseaseObj?.prevention &&
