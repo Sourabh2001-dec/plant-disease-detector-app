@@ -8,6 +8,7 @@ import HomeTabIcon from "../../assets/svgs/HomeTabIcon.svg";
 import HomeTabIconActive from "../../assets/svgs/HomeTabIconActive.svg";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import ResultScreen from "../screens/ResultScreen";
 
 const Tab = createBottomTabNavigator();
 

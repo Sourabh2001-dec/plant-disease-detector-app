@@ -4,6 +4,7 @@ import { SCREENS } from "../shared/constants";
 import TabNavigator from "./TabNavigator";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import ResultScreen from "../screens/ResultScreen";
 
 const Stack = createStackNavigator();
 
@@ -13,6 +14,13 @@ const AppNavigator = () => {
       <Stack.Screen
         name={SCREENS.TABS}
         component={TabNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name={SCREENS.RESULT}
+        component={ResultScreen}
         options={{
           headerShown: false,
         }}
